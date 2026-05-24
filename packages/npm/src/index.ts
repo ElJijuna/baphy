@@ -1,19 +1,3 @@
-export interface GitTreeItem {
-  path: string
-  mode?: string
-  type?: 'blob' | 'tree'
-  sha?: string
-  size?: number
-  url?: string
-}
-
-export interface GitTree {
-  sha?: string
-  url?: string
-  tree: GitTreeItem[]
-  truncated?: boolean
-}
-
 export interface MonoRepoPackage {
   /** Directory path, e.g. "packages/npm" */
   path: string
@@ -24,7 +8,7 @@ export interface MonoRepoPackage {
 export interface MonoRepoResult {
   isMonoRepo: boolean
   packages: MonoRepoPackage[]
-  /** Mirrors gitTree.truncated. When true, results may be incomplete. */
+  /** When true, the source tree was truncated — results may be incomplete. */
   truncated: boolean
 }
 
@@ -65,30 +49,12 @@ const WORKSPACE_DIRS = new Set([
   'plugins',
 ])
 
-/**
- * Analyzes a GitHub API git tree response to detect whether a repository is a monorepo.
- *
- * Detection strategy:
- * - Presence of known config files (pnpm-workspace.yaml, lerna.json, nx.json, rush.json,
- *   .moon/workspace.yml) is a definitive monorepo signal.
- * - turbo.json alone is a soft signal; combined with discovered workspace packages it confirms
- *   a monorepo.
- * - When no config files are found, more than one package.json at depth 2 in a known workspace
- *   directory infers a monorepo (npm/yarn workspaces declared in root package.json, whose
- *   content cannot be read from the tree).
- *
- * Note: when gitTree.truncated is true, GitHub stopped returning results at 100,000 entries.
- * The returned result reflects only the visible portion of the tree; check `truncated` before
- * acting on a false isMonoRepo.
- */
-export function detectMonoRepo(gitTree: GitTree): MonoRepoResult {
+export function detectMonoRepo(paths: string[], truncated = false): MonoRepoResult {
   let hasDefinitive = false
   let hasSoft = false
   const workspacePackages: MonoRepoPackage[] = []
 
-  for (const item of gitTree.tree) {
-    const { path } = item
-
+  for (const path of paths) {
     if (DEFINITIVE_INDICATORS.has(path)) {
       hasDefinitive = true
     } else if (SOFT_INDICATORS.has(path)) {
@@ -113,6 +79,6 @@ export function detectMonoRepo(gitTree: GitTree): MonoRepoResult {
   return {
     isMonoRepo,
     packages: isMonoRepo ? workspacePackages : [],
-    truncated: gitTree.truncated ?? false,
+    truncated,
   }
 }

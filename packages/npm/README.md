@@ -4,7 +4,7 @@
 
 # `@baphy/npm`
 
-**Detect whether a GitHub repository is a monorepo by analyzing its git tree**
+**Detect whether a repository is a monorepo by analyzing its git tree**
 
 [![npm version](https://img.shields.io/npm/v/@baphy/npm?style=flat-square&color=cb3837&logo=npm&logoColor=white)](https://www.npmjs.com/package/@baphy/npm)
 [![npm downloads](https://img.shields.io/npm/dm/@baphy/npm?style=flat-square&color=cb3837)](https://www.npmjs.com/package/@baphy/npm)
@@ -19,11 +19,13 @@
 
 ## Overview
 
-`@baphy/npm` receives the response from the **[GitHub API git tree endpoint](https://docs.github.com/en/rest/git/trees)** and tells you:
+`@baphy/npm` receives a flat list of file paths from any git tree source and tells you:
 
 - **`isMonoRepo`** — whether the repository is a monorepo
-- **`packages`** — the list of workspace packages found, each with the path to its `package.json` so you can fetch it separately via the GitHub API to discover its `name`, `version`, and `private` flag
-- **`truncated`** — whether GitHub truncated the tree at 100,000 entries
+- **`packages`** — the list of workspace packages found, each with the path to its `package.json`
+- **`truncated`** — whether the source truncated the tree (passed through from your input)
+
+**Platform-agnostic** — works with GitHub, GitLab, Bitbucket, or any other source. Map your data to a `string[]` of paths before calling.
 
 **Zero dependencies · Synchronous · O(n) · < 7ms on a 100k-entry tree**
 
@@ -38,15 +40,16 @@ npm install @baphy/npm
 ```ts
 import { detectMonoRepo } from '@baphy/npm'
 
-// Fetch the git tree from the GitHub API (recursive=1 to get all files)
-// GET /repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=1
-const response = await fetch(
-  'https://api.github.com/repos/vercel/turborepo/git/trees/HEAD?recursive=1',
-  { headers: { Authorization: `Bearer ${token}` } }
-)
-const gitTree = await response.json()
+// Map your source data to a string[] of paths, then call detectMonoRepo.
+// The second argument mirrors any truncation flag from your source (optional, defaults to false).
 
-const result = detectMonoRepo(gitTree)
+// GitHub example:
+// GET /repos/{owner}/{repo}/git/trees/{sha}?recursive=1
+const gitTree = await fetch(url, { headers }).then(r => r.json())
+const result = detectMonoRepo(
+  gitTree.tree.map((item: { path: string }) => item.path),
+  gitTree.truncated,
+)
 
 console.log(result)
 // {
@@ -60,14 +63,15 @@ console.log(result)
 // }
 ```
 
-### Fetching package names
+### Fetching package names (GitHub example)
 
-The `packageJsonPath` field lets you retrieve each package's metadata with a second GitHub API call:
+The `packageJsonPath` field lets you retrieve each package's metadata with a second API call:
 
 ```ts
-import { detectMonoRepo } from '@baphy/npm'
-
-const { packages } = detectMonoRepo(gitTree)
+const { packages } = detectMonoRepo(
+  gitTree.tree.map((item: { path: string }) => item.path),
+  gitTree.truncated,
+)
 
 const details = await Promise.all(
   packages.map(async (pkg) => {
@@ -86,17 +90,18 @@ const details = await Promise.all(
 
 ## API
 
-### `detectMonoRepo(gitTree)`
+### `detectMonoRepo(paths, truncated?)`
 
 ```ts
-function detectMonoRepo(gitTree: GitTree): MonoRepoResult
+function detectMonoRepo(paths: string[], truncated?: boolean): MonoRepoResult
 ```
 
 #### Parameters
 
-| Parameter | Type | Description |
-|---|---|---|
-| `gitTree` | `GitTree` | Response from `GET /repos/{owner}/{repo}/git/trees/{sha}?recursive=1` |
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `paths` | `string[]` | — | Flat list of file paths from any git tree source |
+| `truncated` | `boolean` | `false` | Pass through the truncation flag from your source |
 
 #### Returns
 
@@ -104,26 +109,24 @@ function detectMonoRepo(gitTree: GitTree): MonoRepoResult
 interface MonoRepoResult {
   isMonoRepo: boolean
   packages: MonoRepoPackage[]
-  /** true when GitHub truncated the tree at 100,000 entries — results may be incomplete */
+  /** true when the source truncated the tree — results may be incomplete */
   truncated: boolean
 }
 
 interface MonoRepoPackage {
   /** Directory path, e.g. "packages/npm" */
   path: string
-  /** Path to package.json — fetch via GitHub API to read name, version, private flag */
+  /** Path to the package.json for this workspace package */
   packageJsonPath: string
 }
 ```
 
-> **When `truncated` is `true`**, GitHub stopped returning results before scanning the full tree. A `false` `isMonoRepo` may not be reliable. Always check `truncated` before acting on the result.
+> **When `truncated` is `true`**, the tree was cut short before all files were returned. A `false` `isMonoRepo` may not be reliable. Always check `truncated` before acting on the result.
 
 ### Types
 
-All TypeScript types are exported and available for consumers:
-
 ```ts
-import type { GitTree, GitTreeItem, MonoRepoPackage, MonoRepoResult } from '@baphy/npm'
+import type { MonoRepoPackage, MonoRepoResult } from '@baphy/npm'
 ```
 
 ## Detection Strategy

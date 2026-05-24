@@ -1,28 +1,27 @@
 import { bench, describe } from 'vitest'
 import { detectMonoRepo } from './index.js'
-import type { GitTreeItem } from './index.js'
 
 function makeTree(
   size: number,
   options: { indicator?: boolean; packages?: number } = {},
-): { tree: GitTreeItem[] } {
-  const items: GitTreeItem[] = []
+): string[] {
+  const paths: string[] = []
 
   if (options.indicator) {
-    items.push({ path: 'pnpm-workspace.yaml' })
+    paths.push('pnpm-workspace.yaml')
   }
 
   const pkgCount = options.packages ?? 0
   for (let i = 0; i < pkgCount; i++) {
-    items.push({ path: `packages/pkg-${i}/package.json` })
+    paths.push(`packages/pkg-${i}/package.json`)
   }
 
-  const remaining = Math.max(0, size - items.length)
+  const remaining = Math.max(0, size - paths.length)
   for (let i = 0; i < remaining; i++) {
-    items.push({ path: `src/deeply/nested/file-${i}.ts` })
+    paths.push(`src/deeply/nested/file-${i}.ts`)
   }
 
-  return { tree: items }
+  return paths
 }
 
 describe('detectMonoRepo — tree size scaling (O(n) validation)', () => {
@@ -57,6 +56,6 @@ describe('detectMonoRepo — detection scenarios at scale', () => {
   })
 
   bench('empty tree', () => {
-    detectMonoRepo({ tree: [] })
+    detectMonoRepo([])
   })
 })
