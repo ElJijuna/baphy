@@ -1,5 +1,5 @@
 export interface MonoRepoPackage {
-  /** Directory path, e.g. "packages/npm" */
+  /** Directory path, e.g. "." or "packages/npm" */
   path: string
   /** Path to package.json — fetch via GitHub API to read name and private flag */
   packageJsonPath: string
@@ -52,6 +52,7 @@ const WORKSPACE_DIRS = new Set([
 export function detectMonoRepo(paths: string[], truncated = false): MonoRepoResult {
   let hasDefinitive = false
   let hasSoft = false
+  let hasRootPackageJson = false
   const workspacePackages: MonoRepoPackage[] = []
 
   for (const path of paths) {
@@ -68,6 +69,8 @@ export function detectMonoRepo(paths: string[], truncated = false): MonoRepoResu
           packageJsonPath: path,
         })
       }
+    } else if (path === 'package.json') {
+      hasRootPackageJson = true
     }
   }
 
@@ -75,10 +78,15 @@ export function detectMonoRepo(paths: string[], truncated = false): MonoRepoResu
     hasDefinitive ||
     (hasSoft && workspacePackages.length > 0) ||
     workspacePackages.length > 1
+  const packages = isMonoRepo
+    ? workspacePackages
+    : hasRootPackageJson
+      ? [{ path: '.', packageJsonPath: 'package.json' }]
+      : []
 
   return {
     isMonoRepo,
-    packages: isMonoRepo ? workspacePackages : [],
+    packages,
     truncated,
   }
 }

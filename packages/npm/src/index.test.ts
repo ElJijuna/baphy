@@ -47,7 +47,7 @@ describe('turbo.json soft indicator', () => {
   it('turbo.json alone → not a monorepo', () => {
     const result = detectMonoRepo(['turbo.json', 'package.json', 'src/index.ts'])
     expect(result.isMonoRepo).toBe(false)
-    expect(result.packages).toEqual([])
+    expect(result.packages).toEqual([{ path: '.', packageJsonPath: 'package.json' }])
   })
 
   it('turbo.json + one workspace package → monorepo', () => {
@@ -83,7 +83,7 @@ describe('package discovery without indicator files', () => {
   it('zero workspace packages → not a monorepo', () => {
     const result = detectMonoRepo(['package.json', 'src/index.ts', 'README.md'])
     expect(result.isMonoRepo).toBe(false)
-    expect(result.packages).toEqual([])
+    expect(result.packages).toEqual([{ path: '.', packageJsonPath: 'package.json' }])
   })
 
   it('exactly one workspace package → not a monorepo', () => {
@@ -112,9 +112,10 @@ describe('package discovery without indicator files', () => {
     },
   )
 
-  it('root package.json (depth 1) is not counted as workspace package', () => {
+  it('root package.json (depth 1) is returned for single-package repos', () => {
     const result = detectMonoRepo(['package.json'])
     expect(result.isMonoRepo).toBe(false)
+    expect(result.packages).toEqual([{ path: '.', packageJsonPath: 'package.json' }])
   })
 
   it('depth-3+ package.json is not counted as workspace package', () => {
@@ -142,6 +143,7 @@ describe('package discovery without indicator files', () => {
     ])
     // Only 1 valid package, not enough to infer monorepo
     expect(result.isMonoRepo).toBe(false)
+    expect(result.packages).toEqual([{ path: '.', packageJsonPath: 'package.json' }])
   })
 })
 
@@ -239,7 +241,7 @@ describe('non-monorepo repositories', () => {
       'tsconfig.json',
     ])
     expect(result.isMonoRepo).toBe(false)
-    expect(result.packages).toEqual([])
+    expect(result.packages).toEqual([{ path: '.', packageJsonPath: 'package.json' }])
   })
 
   it('Python project with no package.json files', () => {
@@ -263,5 +265,6 @@ describe('non-monorepo repositories', () => {
       'examples/demo/package.json',
     ])
     expect(result.isMonoRepo).toBe(false)
+    expect(result.packages).toEqual([{ path: '.', packageJsonPath: 'package.json' }])
   })
 })

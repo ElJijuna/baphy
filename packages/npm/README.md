@@ -22,7 +22,7 @@
 `@baphy/npm` receives a flat list of file paths from any git tree source and tells you:
 
 - **`isMonoRepo`** — whether the repository is a monorepo
-- **`packages`** — the list of workspace packages found, each with the path to its `package.json`
+- **`packages`** — the list of detected packages, each with the path to its `package.json`
 - **`truncated`** — whether the source truncated the tree (passed through from your input)
 
 **Platform-agnostic** — works with GitHub, GitLab, Bitbucket, or any other source. Map your data to a `string[]` of paths before calling.
@@ -114,11 +114,22 @@ interface MonoRepoResult {
 }
 
 interface MonoRepoPackage {
-  /** Directory path, e.g. "packages/npm" */
+  /** Directory path, e.g. "." or "packages/npm" */
   path: string
-  /** Path to the package.json for this workspace package */
+  /** Path to the package.json for this package */
   packageJsonPath: string
 }
+```
+
+When `isMonoRepo` is `false`, `packages` still includes the root package if a root `package.json` exists:
+
+```ts
+detectMonoRepo(['package.json', 'src/index.ts'])
+// {
+//   isMonoRepo: false,
+//   packages: [{ path: '.', packageJsonPath: 'package.json' }],
+//   truncated: false
+// }
 ```
 
 > **When `truncated` is `true`**, the tree was cut short before all files were returned. A `false` `isMonoRepo` may not be reliable. Always check `truncated` before acting on the result.
