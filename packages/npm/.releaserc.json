@@ -1,0 +1,46 @@
+{
+  "tagFormat": "@baphy/npm@${version}",
+  "branches": ["main"],
+  "plugins": [
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "preset": "conventionalcommits",
+        "releaseRules": [
+          { "scope": "@baphy/npm", "breaking": true,  "release": "major" },
+          { "scope": "@baphy/npm", "type": "feat",    "release": "minor" },
+          { "scope": "@baphy/npm", "type": "fix",     "release": "patch" },
+          { "scope": "@baphy/npm", "type": "perf",    "release": "patch" },
+          { "scope": "@baphy/npm", "type": "revert",  "release": "patch" }
+        ]
+      }
+    ],
+    [
+      "@semantic-release/release-notes-generator",
+      {
+        "preset": "conventionalcommits",
+        "presetConfig": {
+          "types": [
+            { "type": "feat",  "section": "Features"        },
+            { "type": "fix",   "section": "Bug Fixes"       },
+            { "type": "perf",  "section": "Performance"     },
+            { "type": "revert","section": "Reverts"         },
+            { "type": "docs",  "section": "Documentation", "hidden": false },
+            { "type": "chore", "hidden": true               },
+            { "type": "ci",    "hidden": true               }
+          ]
+        }
+      }
+    ],
+    "@semantic-release/changelog",
+    "@semantic-release/npm",
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["CHANGELOG.md", "package.json"],
+        "message": "chore(release): @baphy/npm@${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ],
+    "@semantic-release/github"
+  ]
+}
