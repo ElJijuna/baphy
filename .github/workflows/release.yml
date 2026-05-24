@@ -35,9 +35,18 @@ jobs:
 
       - run: npm run build
 
-      # Add one step per package. Only commits with scope @baphy/npm trigger a release.
+      # Add one step per package. Only commits with the matching scope trigger a release.
       - name: Release @baphy/npm
         working-directory: packages/npm
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
+
+      - name: Release @baphy/dora
+        working-directory: packages/dora
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
