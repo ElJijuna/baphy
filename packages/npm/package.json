@@ -1,6 +1,6 @@
 {
   "name": "@baphy/npm",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Detect whether a GitHub repository is a monorepo by analyzing its git tree",
   "license": "MIT",
   "author": "pilmee <pilmee@gmail.com>",

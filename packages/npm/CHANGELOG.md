@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/ElJijuna/baphy/compare/@baphy/npm@1.1.0...@baphy/npm@1.1.1) (2026-05-25)
+
+### Bug Fixes
+
+* **@baphy/npm:** update to return unique package.json path when is single repo. ([bc8af96](https://github.com/ElJijuna/baphy/commit/bc8af96a0e30d70d6722af55ec0dc4a85ced55d2))
+
 ## [1.1.0](https://github.com/ElJijuna/baphy/compare/@baphy/npm@1.0.0...@baphy/npm@1.1.0) (2026-05-24)
 
 ### Features
