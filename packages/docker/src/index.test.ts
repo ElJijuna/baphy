@@ -1,12 +1,12 @@
-import { describe, expect, it } from 'vitest'
-import { parseDockerfileImages } from './index.js'
+import { describe, expect, it } from 'vitest';
+import { parseDockerfileImages } from './index.js';
 
 describe('parseDockerfileImages', () => {
   it('extracts one FROM image and version', () => {
     const result = parseDockerfileImages(`
       FROM node:20-alpine
       WORKDIR /app
-    `)
+    `);
 
     expect(result).toEqual([
       {
@@ -17,8 +17,8 @@ describe('parseDockerfileImages', () => {
         digest: null,
         stage: null,
       },
-    ])
-  })
+    ]);
+  });
 
   it('extracts multiple FROM images and stage aliases from a multi-stage Dockerfile', () => {
     const result = parseDockerfileImages(`
@@ -31,7 +31,7 @@ describe('parseDockerfileImages', () => {
 
       WORKDIR /app
       COPY --from=builder /app/src ./src
-    `)
+    `);
 
     expect(result).toEqual([
       {
@@ -50,15 +50,15 @@ describe('parseDockerfileImages', () => {
         digest: null,
         stage: null,
       },
-    ])
-  })
+    ]);
+  });
 
   it('handles FROM options, implicit latest tags, registries with ports, and digests', () => {
     const result = parseDockerfileImages(`
       FROM --platform=linux/amd64 alpine
       FROM localhost:5000/team/api:2.4.1 AS api
       FROM gcr.io/distroless/nodejs@sha256:abc123
-    `)
+    `);
 
     expect(result).toEqual([
       {
@@ -85,6 +85,6 @@ describe('parseDockerfileImages', () => {
         digest: 'sha256:abc123',
         stage: null,
       },
-    ])
-  })
-})
+    ]);
+  });
+});
