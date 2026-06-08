@@ -1,3 +1,3 @@
-const { createPackageReleaseConfig } = require('../../scripts/semantic-release-package-config.cjs')
+const { createPackageReleaseConfig } = require('../../scripts/semantic-release-package-config.cjs');
 
-module.exports = createPackageReleaseConfig('@baphy/npm')
+module.exports = createPackageReleaseConfig('@baphy/npm');
