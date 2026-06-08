@@ -1,3 +1,13 @@
+## [1.2.0](https://github.com/ElJijuna/baphy/compare/@baphy/npm@1.1.1...@baphy/npm@1.2.0) (2026-06-08)
+
+### Features
+
+* **@baphy/npm:** update release configuration and changelog for npm package ([2be59de](https://github.com/ElJijuna/baphy/commit/2be59de33b9b50070c39f8a8076a67db06e3a323))
+
+### Bug Fixes
+
+* **@baphy/npm:** standardize code formatting and add missing semicolons across multiple files ([4fa3431](https://github.com/ElJijuna/baphy/commit/4fa3431e3cc84306f763a160f437dde9e180eb81))
+
 ## [1.1.1](https://github.com/ElJijuna/baphy/compare/@baphy/npm@1.1.0...@baphy/npm@1.1.1) (2026-05-25)
 
 ### Bug Fixes
