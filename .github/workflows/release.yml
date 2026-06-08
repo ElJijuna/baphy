@@ -10,13 +10,18 @@ concurrency:
 
 jobs:
   release:
-    name: Release
+    name: Release @baphy/${{ matrix.package }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
       issues: write
       pull-requests: write
       id-token: write
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        package: [npm, dora, docker]
 
     steps:
       - uses: actions/checkout@v4
@@ -33,20 +38,12 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build
+      - run: npm --workspace @baphy/${{ matrix.package }} run build
 
-      # Add one step per package. Only commits with the matching scope trigger a release.
-      - name: Release @baphy/npm
-        working-directory: packages/npm
-        run: npx semantic-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: "true"
-
-      - name: Release @baphy/dora
-        working-directory: packages/dora
+      # Each package has an isolated semantic-release config. Only commits with
+      # the matching package scope can trigger and populate that package release.
+      - name: Release @baphy/${{ matrix.package }}
+        working-directory: packages/${{ matrix.package }}
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
