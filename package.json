@@ -3,18 +3,42 @@
   "version": "0.0.0",
   "private": true,
   "packageManager": "npm@11.12.1",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "build": "turbo run build",
+    "check": "npm run lint && npm run format:check && npm run markdownlint && npm run stylelint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "bench": "turbo run bench"
+    "bench": "turbo run bench",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "biome check --write .",
+    "format:check": "biome check .",
+    "markdownlint": "markdownlint \"**/*.md\" --ignore node_modules",
+    "stylelint": "stylelint \"**/*.{css,scss}\" --ignore-pattern \"docs/api/**\" --ignore-pattern \"**/dist/**\" --allow-empty-input",
+    "docs": "typedoc --options typedoc.json",
+    "commitlint": "commitlint --from HEAD~1 --to HEAD --verbose"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.16",
+    "@commitlint/cli": "21.0.2",
+    "@commitlint/config-conventional": "21.0.2",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "conventional-changelog-conventionalcommits": "8.0.0",
+    "eslint": "10.4.1",
+    "jest": "30.4.2",
+    "markdownlint": "0.40.0",
+    "markdownlint-cli": "0.48.0",
+    "prettier": "3.8.3",
     "semantic-release": "24.2.3",
+    "stylelint": "17.13.0",
+    "stylelint-config-standard": "40.0.0",
+    "super-configs": "1.12.0",
+    "ts-jest": "29.4.11",
+    "typedoc": "0.28.19",
     "turbo": "2.9.14",
     "typescript": "5.8.3"
   }

@@ -1,7 +1,7 @@
-const packageScopes = ['@baphy/npm', '@baphy/dora', '@baphy/docker']
+const packageScopes = ['@baphy/npm', '@baphy/dora', '@baphy/docker'];
 
 function createPackageReleaseConfig(scope) {
-  const otherScopes = packageScopes.filter((packageScope) => packageScope !== scope)
+  const otherScopes = packageScopes.filter((packageScope) => packageScope !== scope);
 
   return {
     tagFormat: `${scope}@\${version}`,
@@ -51,7 +51,7 @@ function createPackageReleaseConfig(scope) {
       ],
       '@semantic-release/github',
     ],
-  }
+  };
 }
 
 function createNoReleaseRules(scopes) {
@@ -61,10 +61,10 @@ function createNoReleaseRules(scopes) {
     { scope, type: 'fix', release: false },
     { scope, type: 'perf', release: false },
     { scope, type: 'revert', release: false },
-  ])
+  ]);
 }
 
 module.exports = {
   createPackageReleaseConfig,
   packageScopes,
-}
+};

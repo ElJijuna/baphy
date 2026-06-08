@@ -3,6 +3,7 @@ dist/
 *.tsbuildinfo
 .turbo/
 coverage/
+docs/api/
 .DS_Store
 *.log
 npm-debug.log*
