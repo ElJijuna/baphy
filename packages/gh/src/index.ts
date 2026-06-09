@@ -49,6 +49,15 @@ const LINKED_BADGE_PATTERN = /\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)/g;
 const IMAGE_PATTERN = /!\[([^\]]*)\]\(([^)]+)\)/g;
 const LINK_PATTERN = /(?<!!)\[([^\]]+)\]\(([^)]+)\)/g;
 
+/**
+ * Parses README markdown into GitHub-facing repository metadata.
+ *
+ * Fenced code blocks are ignored so example headings, badges, and links do not
+ * leak into the returned metadata.
+ *
+ * @param content Full README markdown contents.
+ * @returns README title, description, badges, links, sections, and TOC slugs.
+ */
 export function parseReadme(content: string): ReadmeInfo {
   const withoutCode = stripFencedCode(content);
   const lines = withoutCode.split(/\r?\n/);
@@ -91,7 +100,8 @@ function extractHeadings(lines: string[]): InternalHeading[] {
   const usedSlugs = new Map<string, number>();
   const headings: InternalHeading[] = [];
 
-  for (const [lineIndex, rawLine] of lines.entries()) {
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+    const rawLine = lines[lineIndex];
     const match = rawLine.trim().match(HEADING_PATTERN);
     if (!match) {
       continue;
@@ -136,12 +146,12 @@ function extractBadges(content: string): ReadmeBadge[] {
   const badges: ReadmeBadge[] = [];
   const linkedBadgeImages = new Set<string>();
 
-  for (const match of content.matchAll(LINKED_BADGE_PATTERN)) {
+  for (const match of findMatches(content, LINKED_BADGE_PATTERN)) {
     linkedBadgeImages.add(match[2]);
     badges.push(createBadge(match[1], match[2], match[3]));
   }
 
-  for (const match of content.matchAll(IMAGE_PATTERN)) {
+  for (const match of findMatches(content, IMAGE_PATTERN)) {
     if (!linkedBadgeImages.has(match[2]) && isLikelyBadge(match[1], match[2])) {
       badges.push(createBadge(match[1], match[2], null));
     }
@@ -201,7 +211,7 @@ function extractLinks(content: string): ReadmeLink[] {
   const withoutBadges = content.replace(LINKED_BADGE_PATTERN, '').replace(IMAGE_PATTERN, '');
   const links: ReadmeLink[] = [];
 
-  for (const match of withoutBadges.matchAll(LINK_PATTERN)) {
+  for (const match of findMatches(withoutBadges, LINK_PATTERN)) {
     links.push({
       text: cleanInlineMarkdown(match[1]),
       url: match[2],
@@ -230,10 +240,24 @@ function slugify(value: string): string {
     .trim()
     .toLowerCase()
     .replace(/<[^>]+>/g, '')
-    .replace(/[^\p{Letter}\p{Number}\s-]/gu, '')
+    .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
+}
+
+function findMatches(content: string, pattern: RegExp): RegExpExecArray[] {
+  const matches: RegExpExecArray[] = [];
+  pattern.lastIndex = 0;
+
+  let match = pattern.exec(content);
+  while (match) {
+    matches.push(match);
+    match = pattern.exec(content);
+  }
+
+  pattern.lastIndex = 0;
+  return matches;
 }
 
 function cleanInlineMarkdown(value: string): string {
