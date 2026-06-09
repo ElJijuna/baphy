@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        package: [npm, dora, docker]
+        package: [npm, dora, docker, gh]
 
     steps:
       - uses: actions/checkout@v4
