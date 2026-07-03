@@ -14,15 +14,21 @@ export interface DockerImageReference {
 }
 
 export function parseDockerfileImages(content: string): DockerImageReference[] {
+  // Comment lines are removed before joining continuations: Docker allows
+  // full-line comments between continuation lines, and "#" is only a comment
+  // when it starts the line — a mid-line "#" is a literal character.
   return content
-    .replace(/\\\r?\n/g, ' ')
     .split(/\r?\n/)
+    .filter((line) => !/^\s*#/.test(line))
+    .join('\n')
+    .replace(/\\\r?\n/g, ' ')
+    .split('\n')
     .map(parseFromInstruction)
     .filter((image): image is DockerImageReference => image !== null);
 }
 
 function parseFromInstruction(line: string): DockerImageReference | null {
-  const trimmed = stripComment(line).trim();
+  const trimmed = line.trim();
   if (!trimmed) {
     return null;
   }
@@ -84,9 +90,4 @@ function splitImageReference(image: string): Pick<DockerImageReference, 'name' |
     tag: null,
     digest: null,
   };
-}
-
-function stripComment(line: string): string {
-  const commentStart = line.indexOf('#');
-  return commentStart === -1 ? line : line.slice(0, commentStart);
 }

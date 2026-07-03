@@ -87,4 +87,40 @@ describe('parseDockerfileImages', () => {
       },
     ]);
   });
+
+  it('ignores full-line comments, including indented ones', () => {
+    const result = parseDockerfileImages(`
+      # FROM fake:1.0
+        # FROM another-fake:2.0
+      FROM node:20
+    `);
+
+    expect(result).toEqual([
+      {
+        image: 'node:20',
+        name: 'node',
+        version: '20',
+        tag: '20',
+        digest: null,
+        stage: null,
+      },
+    ]);
+  });
+
+  it('keeps the stage alias when a comment line sits between continuations', () => {
+    const result = parseDockerfileImages(
+      ['FROM node:20 \\', '# comment between continuation lines', '  AS builder'].join('\n'),
+    );
+
+    expect(result).toEqual([
+      {
+        image: 'node:20',
+        name: 'node',
+        version: '20',
+        tag: '20',
+        digest: null,
+        stage: 'builder',
+      },
+    ]);
+  });
 });
