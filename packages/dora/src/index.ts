@@ -1,4 +1,4 @@
-export type { CalcDoraInput, CalcDoraLabels } from './calc-dora.js';
+export type { CalcDoraAggregates, CalcDoraInput, CalcDoraLabels } from './calc-dora.js';
 export { calcDora } from './calc-dora.js';
 
 export {
@@ -13,6 +13,7 @@ export { calcLeadTime } from './metrics/lead-time.js';
 export { calcMttr } from './metrics/mttr.js';
 export { DEFAULT_THRESHOLDS, mergeThresholds } from './thresholds.js';
 export type {
+  AggregateMethod,
   ChangeEvent,
   ChangeFailureRateThresholds,
   DeploymentEvent,

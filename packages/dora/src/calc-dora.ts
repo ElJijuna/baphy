@@ -3,6 +3,7 @@ import { calcDeploymentFrequency } from './metrics/deployment-frequency.js';
 import { calcLeadTime } from './metrics/lead-time.js';
 import { calcMttr } from './metrics/mttr.js';
 import type {
+  AggregateMethod,
   ChangeEvent,
   DeploymentEvent,
   DoraLevel,
@@ -20,6 +21,11 @@ export interface CalcDoraLabels {
   mttr?: LabelFormatter;
 }
 
+export interface CalcDoraAggregates {
+  leadTime?: AggregateMethod;
+  mttr?: AggregateMethod;
+}
+
 export interface CalcDoraInput {
   deployments?: DeploymentEvent[];
   changes?: ChangeEvent[];
@@ -27,6 +33,7 @@ export interface CalcDoraInput {
   period?: Period;
   thresholds?: Partial<DoraThresholds>;
   labels?: CalcDoraLabels;
+  aggregates?: CalcDoraAggregates;
 }
 
 const LEVEL_RANK: Record<DoraLevel, number> = {
@@ -71,6 +78,7 @@ export function calcDora(input: CalcDoraInput): DoraResult {
     const lt = calcLeadTime(input.changes, {
       thresholds: input.thresholds?.leadTime,
       label: input.labels?.leadTime,
+      aggregate: input.aggregates?.leadTime,
     });
     result.leadTime = lt;
     levels.push(lt.level);
@@ -80,6 +88,7 @@ export function calcDora(input: CalcDoraInput): DoraResult {
     const mttr = calcMttr(input.incidents, {
       thresholds: input.thresholds?.mttr,
       label: input.labels?.mttr,
+      aggregate: input.aggregates?.mttr,
     });
     result.mttr = mttr;
     levels.push(mttr.level);

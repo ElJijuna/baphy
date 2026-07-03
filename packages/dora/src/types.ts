@@ -16,6 +16,8 @@ export interface DoraResult {
 
 export type LabelFormatter = (value: number, level: DoraLevel) => string;
 
+export type AggregateMethod = 'mean' | 'median' | 'p90';
+
 export interface DeploymentFrequencyThresholds {
   elite: number;
   high: number;

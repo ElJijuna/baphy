@@ -138,6 +138,7 @@ interface CalcDoraInput {
   period?: Period                     // defaults to last 90 days
   thresholds?: Partial<DoraThresholds>
   labels?: CalcDoraLabels             // per-metric label formatter overrides
+  aggregates?: CalcDoraAggregates     // per-metric aggregation overrides
 }
 
 interface DoraResult {
@@ -162,7 +163,7 @@ function calcDeploymentFrequency(
 
 function calcLeadTime(
   changes: ChangeEvent[],
-  options?: { thresholds?: Partial<LeadTimeThresholds>; label?: LabelFormatter }
+  options?: { thresholds?: Partial<LeadTimeThresholds>; label?: LabelFormatter; aggregate?: AggregateMethod }
 ): DoraLevelResult
 
 function calcChangeFailureRate(
@@ -172,9 +173,25 @@ function calcChangeFailureRate(
 
 function calcMttr(
   incidents: IncidentEvent[],
-  options?: { thresholds?: Partial<MttrThresholds>; label?: LabelFormatter }
+  options?: { thresholds?: Partial<MttrThresholds>; label?: LabelFormatter; aggregate?: AggregateMethod }
 ): DoraLevelResult
 ```
+
+### Aggregation
+
+Lead time and MTTR aggregate their series with the **mean** by default. The mean is sensitive to outliers — one week-long incident drags an otherwise-elite MTTR — so both metrics accept an `aggregate` option (the DORA research program reports percentile-based figures):
+
+```ts
+type AggregateMethod = 'mean' | 'median' | 'p90'
+
+calcLeadTime(changes, { aggregate: 'median' })
+calcMttr(incidents, { aggregate: 'p90' })
+
+// per-metric overrides via calcDora
+calcDora({ changes, incidents, aggregates: { leadTime: 'median', mttr: 'p90' } })
+```
+
+Median averages the middle pair on even-sized series; `p90` uses the nearest-rank method. Non-mean methods sort a copy of the series, so they are O(n log n) instead of O(n).
 
 ### Return type
 

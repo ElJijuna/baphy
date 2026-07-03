@@ -1,13 +1,20 @@
 import { labelMttr } from '../formatters.js';
 import { DEFAULT_THRESHOLDS } from '../thresholds.js';
-import type { DoraLevelResult, IncidentEvent, LabelFormatter, MttrThresholds } from '../types.js';
-import { classify, EMPTY_RESULT, resolveLabel } from './shared.js';
+import type {
+  AggregateMethod,
+  DoraLevelResult,
+  IncidentEvent,
+  LabelFormatter,
+  MttrThresholds,
+} from '../types.js';
+import { aggregate, classify, EMPTY_RESULT, resolveLabel } from './shared.js';
 
 export function calcMttr(
   incidents: IncidentEvent[],
   options?: {
     thresholds?: Partial<MttrThresholds>;
     label?: LabelFormatter;
+    aggregate?: AggregateMethod;
   },
 ): DoraLevelResult {
   if (incidents.length === 0) {
@@ -19,12 +26,11 @@ export function calcMttr(
     ...options?.thresholds,
   };
 
-  const totalHours = incidents.reduce((sum, i) => {
-    const ms = i.restoredAt.getTime() - i.failedAt.getTime();
-    return sum + ms / (1000 * 60 * 60);
-  }, 0);
+  const hours = incidents.map(
+    (i) => (i.restoredAt.getTime() - i.failedAt.getTime()) / (1000 * 60 * 60),
+  );
 
-  const value = totalHours / incidents.length;
+  const value = aggregate(hours, options?.aggregate ?? 'mean');
   const level = classify(value, thresholds, 'lowerIsBetter');
   const label = resolveLabel(options?.label, labelMttr, value, level);
 

@@ -84,6 +84,22 @@ describe('calcLeadTime — input size scaling', () => {
   });
 });
 
+describe('calcLeadTime — aggregation methods on 100,000 changes', () => {
+  const changes = makeChanges(100_000);
+
+  bench('mean', () => {
+    calcLeadTime(changes, { aggregate: 'mean' });
+  });
+
+  bench('median', () => {
+    calcLeadTime(changes, { aggregate: 'median' });
+  });
+
+  bench('p90', () => {
+    calcLeadTime(changes, { aggregate: 'p90' });
+  });
+});
+
 // --- change failure rate ---
 
 describe('calcChangeFailureRate — input size scaling', () => {

@@ -339,6 +339,58 @@ describe('calcDora', () => {
   });
 });
 
+// --- aggregation methods ---
+
+describe('aggregation methods', () => {
+  function changesWithHours(hours: number[]): ChangeEvent[] {
+    return hours.map((h) => ({
+      startedAt: new Date(Date.now() - h * 60 * 60 * 1000),
+      deployedAt: new Date(),
+    }));
+  }
+
+  function incidentsWithHours(hours: number[]): IncidentEvent[] {
+    return hours.map((h) => ({
+      failedAt: new Date(Date.now() - h * 60 * 60 * 1000),
+      restoredAt: new Date(),
+    }));
+  }
+
+  it('calcLeadTime defaults to mean', () => {
+    const result = calcLeadTime(changesWithHours([1, 2, 100]));
+    expect(result.value).toBeCloseTo(103 / 3);
+  });
+
+  it('calcLeadTime median resists outliers', () => {
+    const result = calcLeadTime(changesWithHours([1, 2, 100]), { aggregate: 'median' });
+    expect(result.value).toBeCloseTo(2);
+    expect(result.level).toBe('high');
+  });
+
+  it('median of an even-sized series averages the middle pair', () => {
+    const result = calcLeadTime(changesWithHours([1, 2, 3, 4]), { aggregate: 'median' });
+    expect(result.value).toBeCloseTo(2.5);
+  });
+
+  it('calcMttr p90 uses nearest-rank percentile', () => {
+    const result = calcMttr(incidentsWithHours([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), {
+      aggregate: 'p90',
+    });
+    expect(result.value).toBeCloseTo(9);
+  });
+
+  it('calcDora passes per-metric aggregates through', () => {
+    const result = calcDora({
+      changes: changesWithHours([1, 2, 100]),
+      incidents: incidentsWithHours([1, 2, 100]),
+      period: period(30),
+      aggregates: { leadTime: 'median', mttr: 'median' },
+    });
+    expect(result.leadTime?.value).toBeCloseTo(2);
+    expect(result.mttr?.value).toBeCloseTo(2);
+  });
+});
+
 // --- label formatters ---
 
 describe('label formatters', () => {
