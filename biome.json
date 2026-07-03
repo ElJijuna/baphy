@@ -8,6 +8,7 @@
       "!dist",
       "!**/dist",
       "!coverage",
+      "!**/coverage",
       "!storybook-static",
       "!node_modules",
       "!.turbo",

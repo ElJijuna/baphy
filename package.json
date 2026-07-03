@@ -17,7 +17,7 @@
     "format": "biome check --write .",
     "format:check": "biome check .",
     "markdownlint": "markdownlint \"**/*.md\" --ignore node_modules",
-    "stylelint": "stylelint \"**/*.{css,scss}\" --ignore-pattern \"docs/api/**\" --ignore-pattern \"**/dist/**\" --allow-empty-input",
+    "stylelint": "stylelint \"**/*.{css,scss}\" --ignore-pattern \"docs/api/**\" --ignore-pattern \"**/dist/**\" --ignore-pattern \"**/coverage/**\" --allow-empty-input",
     "docs": "typedoc --options typedoc.json",
     "commitlint": "commitlint --from HEAD~1 --to HEAD --verbose"
   },
@@ -27,6 +27,7 @@
     "@commitlint/config-conventional": "21.0.2",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
+    "@vitest/coverage-v8": "^3.2.2",
     "conventional-changelog-conventionalcommits": "8.0.0",
     "eslint": "10.4.1",
     "jest": "30.4.2",
@@ -38,8 +39,8 @@
     "stylelint-config-standard": "40.0.0",
     "super-configs": "1.12.0",
     "ts-jest": "29.4.11",
-    "typedoc": "0.28.19",
     "turbo": "2.9.14",
+    "typedoc": "0.28.19",
     "typescript": "5.8.3"
   }
 }

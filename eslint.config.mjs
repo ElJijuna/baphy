@@ -6,6 +6,7 @@ export default [
       'dist/**',
       '**/dist/**',
       'coverage/**',
+      '**/coverage/**',
       'node_modules/**',
       '.turbo/**',
       'docs/api/**',
