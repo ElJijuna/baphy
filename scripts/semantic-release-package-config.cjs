@@ -1,4 +1,10 @@
-const packageScopes = ['@baphy/npm', '@baphy/dora', '@baphy/docker', '@baphy/gh'];
+const packageScopes = [
+  '@baphy/npm',
+  '@baphy/dora',
+  '@baphy/docker',
+  '@baphy/gh',
+  '@baphy/codeowners',
+];
 
 function createPackageReleaseConfig(scope) {
   const otherScopes = packageScopes.filter((packageScope) => packageScope !== scope);

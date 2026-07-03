@@ -1,0 +1,61 @@
+{
+  "name": "@baphy/codeowners",
+  "version": "1.0.0",
+  "description": "Parse CODEOWNERS files and resolve which rule owns a given path",
+  "license": "MIT",
+  "author": "pilmee <pilmee@gmail.com>",
+  "homepage": "https://github.com/ElJijuna/baphy#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ElJijuna/baphy.git",
+    "directory": "packages/codeowners"
+  },
+  "bugs": {
+    "url": "https://github.com/ElJijuna/baphy/issues"
+  },
+  "keywords": [
+    "codeowners",
+    "github",
+    "gitlab",
+    "owners",
+    "parser",
+    "gitignore",
+    "glob"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "bench": "vitest bench"
+  },
+  "devDependencies": {
+    "tsup": "8.5.1",
+    "vitest": "3.2.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
