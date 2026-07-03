@@ -46,14 +46,20 @@ export function calcDora(input: CalcDoraInput): DoraResult {
   const levels: DoraLevel[] = [];
 
   if (input.deployments !== undefined) {
-    const df = calcDeploymentFrequency(input.deployments, period, {
+    // All deployment-based metrics computed here respect the period; the
+    // individual metric functions themselves do not filter (except DF).
+    const deploymentsInPeriod = input.deployments.filter(
+      (e) => e.deployedAt >= period.start && e.deployedAt <= period.end,
+    );
+
+    const df = calcDeploymentFrequency(deploymentsInPeriod, period, {
       thresholds: input.thresholds?.deploymentFrequency,
       label: input.labels?.deploymentFrequency,
     });
     result.deploymentFrequency = df;
     levels.push(df.level);
 
-    const cfr = calcChangeFailureRate(input.deployments, {
+    const cfr = calcChangeFailureRate(deploymentsInPeriod, {
       thresholds: input.thresholds?.changeFailureRate,
       label: input.labels?.changeFailureRate,
     });

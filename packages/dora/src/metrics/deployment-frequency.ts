@@ -3,49 +3,11 @@ import { DEFAULT_THRESHOLDS } from '../thresholds.js';
 import type {
   DeploymentEvent,
   DeploymentFrequencyThresholds,
-  DoraLevel,
   DoraLevelResult,
   LabelFormatter,
   Period,
 } from '../types.js';
-
-function classify(
-  value: number,
-  thresholds: { elite: number; high: number; medium: number },
-  lowerIsBetter: boolean,
-): DoraLevel {
-  if (lowerIsBetter) {
-    if (value <= thresholds.elite) {
-      return 'elite';
-    }
-    if (value <= thresholds.high) {
-      return 'high';
-    }
-    if (value <= thresholds.medium) {
-      return 'medium';
-    }
-    return 'low';
-  }
-  if (value >= thresholds.elite) {
-    return 'elite';
-  }
-  if (value >= thresholds.high) {
-    return 'high';
-  }
-  if (value >= thresholds.medium) {
-    return 'medium';
-  }
-  return 'low';
-}
-
-function resolveLabel(
-  formatter: LabelFormatter | undefined,
-  defaultFormatter: LabelFormatter,
-  value: number,
-  level: DoraLevel,
-): string {
-  return (formatter ?? defaultFormatter)(value, level);
-}
+import { classify, EMPTY_RESULT, resolveLabel } from './shared.js';
 
 export function calcDeploymentFrequency(
   events: DeploymentEvent[],
@@ -56,7 +18,7 @@ export function calcDeploymentFrequency(
   },
 ): DoraLevelResult {
   if (events.length === 0) {
-    return { value: 0, level: 'low', label: '—' };
+    return EMPTY_RESULT;
   }
 
   const thresholds = {
@@ -66,13 +28,16 @@ export function calcDeploymentFrequency(
 
   const periodMs = period.end.getTime() - period.start.getTime();
   const periodDays = periodMs / (1000 * 60 * 60 * 24);
+  if (periodDays <= 0) {
+    return EMPTY_RESULT;
+  }
 
   const successful = events.filter(
     (e) => e.success && e.deployedAt >= period.start && e.deployedAt <= period.end,
   );
 
   const value = successful.length / periodDays;
-  const level = classify(value, thresholds, false);
+  const level = classify(value, thresholds, 'higherIsBetter');
   const label = resolveLabel(options?.label, labelDeploymentFrequency, value, level);
 
   return { value, level, label };

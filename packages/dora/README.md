@@ -149,6 +149,8 @@ interface DoraResult {
 }
 ```
 
+**Period filtering** — inside `calcDora`, deployment-based metrics (`deploymentFrequency` and `changeFailureRate`) only count deployments within `period`. The individual metric functions do not filter by period — `calcChangeFailureRate` uses every event it receives.
+
 ### Individual metric functions
 
 ```ts

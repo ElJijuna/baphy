@@ -97,6 +97,20 @@ describe('calcDeploymentFrequency', () => {
     });
     expect(result.level).not.toBe('elite');
   });
+
+  it('zero-length period → { value: 0, level: low } instead of Infinity', () => {
+    const now = new Date();
+    const result = calcDeploymentFrequency(deployments(5), { start: now, end: now });
+    expect(result).toEqual({ value: 0, level: 'low', label: '—' });
+  });
+
+  it('inverted period → { value: 0, level: low } instead of negative value', () => {
+    const result = calcDeploymentFrequency(deployments(5), {
+      start: new Date(),
+      end: daysAgo(30),
+    });
+    expect(result).toEqual({ value: 0, level: 'low', label: '—' });
+  });
 });
 
 // --- calcLeadTime ---
@@ -293,6 +307,21 @@ describe('calcDora', () => {
   it('default period applied when not provided', () => {
     const result = calcDora({ deployments: deployments(10) });
     expect(result.deploymentFrequency).toBeDefined();
+  });
+
+  it('changeFailureRate only counts deployments within period', () => {
+    const p = period(30);
+    const inPeriod: DeploymentEvent[] = [
+      { deployedAt: daysAgo(1), success: true },
+      { deployedAt: daysAgo(2), success: true },
+      { deployedAt: daysAgo(3), success: false },
+    ];
+    const outOfPeriod: DeploymentEvent[] = [
+      { deployedAt: new Date(2000, 0, 1), success: false },
+      { deployedAt: new Date(2000, 0, 2), success: false },
+    ];
+    const result = calcDora({ deployments: [...inPeriod, ...outOfPeriod], period: p });
+    expect(result.changeFailureRate?.value).toBeCloseTo((1 / 3) * 100);
   });
 
   it('custom labels passed through to each metric', () => {

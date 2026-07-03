@@ -1,37 +1,7 @@
 import { labelLeadTime } from '../formatters.js';
 import { DEFAULT_THRESHOLDS } from '../thresholds.js';
-import type {
-  ChangeEvent,
-  DoraLevel,
-  DoraLevelResult,
-  LabelFormatter,
-  LeadTimeThresholds,
-} from '../types.js';
-
-function classify(
-  value: number,
-  thresholds: { elite: number; high: number; medium: number },
-): DoraLevel {
-  if (value <= thresholds.elite) {
-    return 'elite';
-  }
-  if (value <= thresholds.high) {
-    return 'high';
-  }
-  if (value <= thresholds.medium) {
-    return 'medium';
-  }
-  return 'low';
-}
-
-function resolveLabel(
-  formatter: LabelFormatter | undefined,
-  defaultFormatter: LabelFormatter,
-  value: number,
-  level: DoraLevel,
-): string {
-  return (formatter ?? defaultFormatter)(value, level);
-}
+import type { ChangeEvent, DoraLevelResult, LabelFormatter, LeadTimeThresholds } from '../types.js';
+import { classify, EMPTY_RESULT, resolveLabel } from './shared.js';
 
 export function calcLeadTime(
   changes: ChangeEvent[],
@@ -41,7 +11,7 @@ export function calcLeadTime(
   },
 ): DoraLevelResult {
   if (changes.length === 0) {
-    return { value: 0, level: 'low', label: '—' };
+    return EMPTY_RESULT;
   }
 
   const thresholds = {
@@ -55,7 +25,7 @@ export function calcLeadTime(
   }, 0);
 
   const value = totalHours / changes.length;
-  const level = classify(value, thresholds);
+  const level = classify(value, thresholds, 'lowerIsBetter');
   const label = resolveLabel(options?.label, labelLeadTime, value, level);
 
   return { value, level, label };
