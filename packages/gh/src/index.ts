@@ -82,16 +82,23 @@ interface InternalHeading extends ReadmeSection {
 
 function stripFencedCode(content: string): string {
   const lines = content.split(/\r?\n/);
-  let inFence = false;
+  let openFence: string | null = null;
 
   return lines
     .map((line) => {
-      if (/^\s*(```|~~~)/.test(line)) {
-        inFence = !inFence;
+      const fence = line.match(/^\s*(```|~~~)/)?.[1] ?? null;
+      if (fence) {
+        // A fence only closes when it matches the delimiter that opened it;
+        // a ~~~ line inside a ``` block is code, not a closing fence.
+        if (openFence === null) {
+          openFence = fence;
+        } else if (fence === openFence) {
+          openFence = null;
+        }
         return '';
       }
 
-      return inFence ? '' : line;
+      return openFence !== null ? '' : line;
     })
     .join('\n');
 }
@@ -236,11 +243,13 @@ function createUniqueSlug(title: string, usedSlugs: Map<string, number>): string
 }
 
 function slugify(value: string): string {
+  // GitHub's slugger keeps unicode letters and numbers, so non-English
+  // headings produce distinct slugs instead of colliding empty ones.
   return value
     .trim()
     .toLowerCase()
     .replace(/<[^>]+>/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');

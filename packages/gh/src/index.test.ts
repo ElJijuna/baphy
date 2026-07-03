@@ -99,4 +99,39 @@ npm install @baphy/docker
     ]);
     expect(result.tableOfContents).toEqual(['api', 'api-1']);
   });
+
+  it('keeps unicode letters in slugs like GitHub does', () => {
+    const result = parseReadme(`
+# Proyecto
+
+## Instalación
+
+## Configuración
+
+## 使い方
+`);
+
+    expect(result.sections).toEqual([
+      { depth: 2, title: 'Instalación', slug: 'instalación' },
+      { depth: 2, title: 'Configuración', slug: 'configuración' },
+      { depth: 2, title: '使い方', slug: '使い方' },
+    ]);
+  });
+
+  it('does not close a backtick fence with a tilde fence', () => {
+    const result = parseReadme(`
+# Project
+
+\`\`\`md
+~~~
+## Hidden heading
+[hidden](https://example.com/hidden)
+\`\`\`
+
+## Visible
+`);
+
+    expect(result.sections).toEqual([{ depth: 2, title: 'Visible', slug: 'visible' }]);
+    expect(result.links).toEqual([]);
+  });
 });
