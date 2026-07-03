@@ -29,6 +29,9 @@ For each image it tells you:
 - **`tag`** — the tag when present
 - **`digest`** — the digest when present
 - **`stage`** — the multi-stage alias from `AS <name>` when present
+- **`isStageReference`** — whether the `FROM` points to a previous build stage instead of an image
+
+`ARG` defaults declared before the first `FROM` are resolved inside image references, supporting the `${NAME}`, `$NAME`, and `${NAME:-fallback}` forms. ARGs without a resolvable value are kept literal.
 
 **Zero dependencies · Synchronous · Supports multi-stage Dockerfiles**
 
@@ -66,6 +69,7 @@ console.log(images)
 //     tag: '1-alpine',
 //     digest: null,
 //     stage: 'builder',
+//     isStageReference: false,
 //   },
 //   {
 //     image: 'oven/bun:1-alpine',
@@ -74,6 +78,7 @@ console.log(images)
 //     tag: '1-alpine',
 //     digest: null,
 //     stage: null,
+//     isStageReference: false,
 //   },
 // ]
 ```
@@ -106,7 +111,7 @@ function parseDockerfileImages(content: string): DockerImageReference[]
 
 ```ts
 interface DockerImageReference {
-  /** Image reference exactly as it appears after FROM options. */
+  /** Image reference as it appears after FROM options, with ARGs resolved when possible. */
   image: string
   /** Image name without tag or digest. */
   name: string
@@ -118,6 +123,8 @@ interface DockerImageReference {
   digest: string | null
   /** Stage alias from "AS <name>", when present. */
   stage: string | null
+  /** True when the FROM references a previous build stage instead of an image. */
+  isStageReference: boolean
 }
 ```
 
@@ -130,10 +137,25 @@ interface DockerImageReference {
 | `FROM --platform=linux/amd64 node:22` | `node` | `22` |
 | `FROM localhost:5000/team/api:2.4.1` | `localhost:5000/team/api` | `2.4.1` |
 | `FROM gcr.io/distroless/nodejs@sha256:abc123` | `gcr.io/distroless/nodejs` | `sha256:abc123` |
+| `ARG TAG=20` + `FROM node:${TAG}` | `node` | `20` |
+| `FROM ${BASE_IMAGE:-alpine}` | `alpine` | `latest` |
+
+### Stage references
+
+When a `FROM` names a previous stage instead of an image, the entry is flagged so you can filter it out of image inventories:
+
+```ts
+parseDockerfileImages(`
+FROM node:20 AS builder
+FROM builder
+`)
+// [ { image: 'node:20', ..., stage: 'builder', isStageReference: false },
+//   { image: 'builder', ..., isStageReference: true } ]
+```
 
 ## Notes
 
-This parser is intentionally small and focused on image extraction. It ignores non-`FROM` instructions, comments, and `COPY --from=...` stage references.
+This parser is intentionally small and focused on image extraction. It ignores non-`FROM` instructions, comments, and `COPY --from=...` stage references. Only `ARG` defaults declared before the first `FROM` participate in resolution — build-time overrides are unknowable from the file alone.
 
 ## License
 
