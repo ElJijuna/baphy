@@ -82,11 +82,13 @@ interface InternalHeading extends ReadmeSection {
 
 function stripFencedCode(content: string): string {
   const lines = content.split(/\r?\n/);
+
   let openFence: string | null = null;
 
   return lines
     .map((line) => {
       const fence = line.match(/^\s*(```|~~~)/)?.[1] ?? null;
+
       if (fence) {
         // A fence only closes when it matches the delimiter that opened it;
         // a ~~~ line inside a ``` block is code, not a closing fence.
@@ -95,6 +97,7 @@ function stripFencedCode(content: string): string {
         } else if (fence === openFence) {
           openFence = null;
         }
+
         return '';
       }
 
@@ -110,11 +113,13 @@ function extractHeadings(lines: string[]): InternalHeading[] {
   for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
     const rawLine = lines[lineIndex];
     const match = rawLine.trim().match(HEADING_PATTERN);
+
     if (!match) {
       continue;
     }
 
     const title = cleanInlineMarkdown(match[2]);
+
     headings.push({
       depth: match[1].length,
       title,
@@ -129,6 +134,7 @@ function extractHeadings(lines: string[]): InternalHeading[] {
 function extractDescription(lines: string[], titleLineIndex: number): string | null {
   for (const rawLine of lines.slice(Math.max(titleLineIndex + 1, 0))) {
     const line = rawLine.trim();
+
     if (
       !line ||
       line === '---' ||
@@ -194,6 +200,7 @@ function inferBadgeSubject(url: URL | null): string | null {
   }
 
   const parts = url.pathname.split('/').filter(Boolean);
+
   if (parts[0] === 'badge') {
     return decodeBadgeText(parts[1]?.split('-')[0] ?? '');
   }
@@ -230,6 +237,7 @@ function extractLinks(content: string): ReadmeLink[] {
 
 function isLikelyBadge(alt: string, image: string): boolean {
   const url = parseUrl(image);
+
   return (
     url?.hostname.endsWith('shields.io') === true || /badge|build|ci|license|version/i.test(alt)
   );
@@ -238,7 +246,9 @@ function isLikelyBadge(alt: string, image: string): boolean {
 function createUniqueSlug(title: string, usedSlugs: Map<string, number>): string {
   const base = slugify(title);
   const seen = usedSlugs.get(base) ?? 0;
+
   usedSlugs.set(base, seen + 1);
+
   return seen === 0 ? base : `${base}-${seen}`;
 }
 
@@ -257,15 +267,18 @@ function slugify(value: string): string {
 
 function findMatches(content: string, pattern: RegExp): RegExpExecArray[] {
   const matches: RegExpExecArray[] = [];
+
   pattern.lastIndex = 0;
 
   let match = pattern.exec(content);
+
   while (match) {
     matches.push(match);
     match = pattern.exec(content);
   }
 
   pattern.lastIndex = 0;
+
   return matches;
 }
 
