@@ -13,10 +13,4 @@ export default [
     ],
   },
   ...eslintTs,
-  {
-    files: ['**/*.cjs'],
-    rules: {
-      '@typescript-eslint/no-require-imports': 'off',
-    },
-  },
 ];
