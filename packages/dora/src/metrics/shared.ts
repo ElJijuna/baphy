@@ -14,8 +14,10 @@ export function aggregate(values: number[], method: AggregateMethod): number {
   }
 
   const sorted = [...values].sort((a, b) => a - b);
+
   if (method === 'median') {
     const mid = Math.floor(sorted.length / 2);
+
     return sorted.length % 2 === 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
   }
 
@@ -31,23 +33,30 @@ export function classify(
     if (value <= thresholds.elite) {
       return 'elite';
     }
+
     if (value <= thresholds.high) {
       return 'high';
     }
+
     if (value <= thresholds.medium) {
       return 'medium';
     }
+
     return 'low';
   }
+
   if (value >= thresholds.elite) {
     return 'elite';
   }
+
   if (value >= thresholds.high) {
     return 'high';
   }
+
   if (value >= thresholds.medium) {
     return 'medium';
   }
+
   return 'low';
 }
 

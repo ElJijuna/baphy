@@ -23,7 +23,6 @@ export function calcChangeFailureRate(
     ...DEFAULT_THRESHOLDS.changeFailureRate,
     ...options?.thresholds,
   };
-
   const failures = events.filter((e) => !e.success).length;
   const value = (failures / events.length) * 100;
   const level = classify(value, thresholds, 'lowerIsBetter');

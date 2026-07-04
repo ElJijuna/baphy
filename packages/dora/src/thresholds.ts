@@ -27,6 +27,7 @@ export function mergeThresholds(overrides?: Partial<DoraThresholds>): DoraThresh
   if (!overrides) {
     return DEFAULT_THRESHOLDS;
   }
+
   return {
     deploymentFrequency: {
       ...DEFAULT_THRESHOLDS.deploymentFrequency,

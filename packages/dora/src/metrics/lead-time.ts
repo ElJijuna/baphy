@@ -25,11 +25,9 @@ export function calcLeadTime(
     ...DEFAULT_THRESHOLDS.leadTime,
     ...options?.thresholds,
   };
-
   const hours = changes.map(
     (c) => (c.deployedAt.getTime() - c.startedAt.getTime()) / (1000 * 60 * 60),
   );
-
   const value = aggregate(hours, options?.aggregate ?? 'mean');
   const level = classify(value, thresholds, 'lowerIsBetter');
   const label = resolveLabel(options?.label, labelLeadTime, value, level);

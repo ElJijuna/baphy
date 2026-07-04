@@ -25,9 +25,9 @@ export function calcDeploymentFrequency(
     ...DEFAULT_THRESHOLDS.deploymentFrequency,
     ...options?.thresholds,
   };
-
   const periodMs = period.end.getTime() - period.start.getTime();
   const periodDays = periodMs / (1000 * 60 * 60 * 24);
+
   if (periodDays <= 0) {
     return EMPTY_RESULT;
   }
@@ -35,7 +35,6 @@ export function calcDeploymentFrequency(
   const successful = events.filter(
     (e) => e.success && e.deployedAt >= period.start && e.deployedAt <= period.end,
   );
-
   const value = successful.length / periodDays;
   const level = classify(value, thresholds, 'higherIsBetter');
   const label = resolveLabel(options?.label, labelDeploymentFrequency, value, level);

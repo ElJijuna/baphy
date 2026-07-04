@@ -10,12 +10,14 @@ import {
 
 function makePeriod(days = 90): Period {
   const end = new Date('2024-01-01T00:00:00Z');
+
   return { start: new Date(end.getTime() - days * 24 * 60 * 60 * 1000), end };
 }
 
 function makeDeployments(count: number, failureRate = 0.05): DeploymentEvent[] {
   const period = makePeriod();
   const span = period.end.getTime() - period.start.getTime();
+
   return Array.from({ length: count }, (_, i) => ({
     deployedAt: new Date(period.start.getTime() + (i / count) * span),
     success: i % Math.round(1 / failureRate) !== 0,
@@ -24,6 +26,7 @@ function makeDeployments(count: number, failureRate = 0.05): DeploymentEvent[] {
 
 function makeChanges(count: number, leadHours = 4): ChangeEvent[] {
   const base = new Date('2024-01-01T00:00:00Z');
+
   return Array.from({ length: count }, (_, i) => ({
     startedAt: new Date(base.getTime() - (count - i) * 24 * 60 * 60 * 1000),
     deployedAt: new Date(
@@ -34,6 +37,7 @@ function makeChanges(count: number, leadHours = 4): ChangeEvent[] {
 
 function makeIncidents(count: number, mttrHours = 0.5): IncidentEvent[] {
   const base = new Date('2024-01-01T00:00:00Z');
+
   return Array.from({ length: count }, (_, i) => ({
     failedAt: new Date(base.getTime() - (count - i) * 24 * 60 * 60 * 1000),
     restoredAt: new Date(

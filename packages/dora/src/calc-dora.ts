@@ -48,7 +48,6 @@ export function calcDora(input: CalcDoraInput): DoraResult {
     start: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
     end: new Date(),
   };
-
   const result: DoraResult = {};
   const levels: DoraLevel[] = [];
 
@@ -58,11 +57,11 @@ export function calcDora(input: CalcDoraInput): DoraResult {
     const deploymentsInPeriod = input.deployments.filter(
       (e) => e.deployedAt >= period.start && e.deployedAt <= period.end,
     );
-
     const df = calcDeploymentFrequency(deploymentsInPeriod, period, {
       thresholds: input.thresholds?.deploymentFrequency,
       label: input.labels?.deploymentFrequency,
     });
+
     result.deploymentFrequency = df;
     levels.push(df.level);
 
@@ -70,6 +69,7 @@ export function calcDora(input: CalcDoraInput): DoraResult {
       thresholds: input.thresholds?.changeFailureRate,
       label: input.labels?.changeFailureRate,
     });
+
     result.changeFailureRate = cfr;
     levels.push(cfr.level);
   }
@@ -80,6 +80,7 @@ export function calcDora(input: CalcDoraInput): DoraResult {
       label: input.labels?.leadTime,
       aggregate: input.aggregates?.leadTime,
     });
+
     result.leadTime = lt;
     levels.push(lt.level);
   }
@@ -90,6 +91,7 @@ export function calcDora(input: CalcDoraInput): DoraResult {
       label: input.labels?.mttr,
       aggregate: input.aggregates?.mttr,
     });
+
     result.mttr = mttr;
     levels.push(mttr.level);
   }

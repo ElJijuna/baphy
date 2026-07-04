@@ -25,11 +25,9 @@ export function calcMttr(
     ...DEFAULT_THRESHOLDS.mttr,
     ...options?.thresholds,
   };
-
   const hours = incidents.map(
     (i) => (i.restoredAt.getTime() - i.failedAt.getTime()) / (1000 * 60 * 60),
   );
-
   const value = aggregate(hours, options?.aggregate ?? 'mean');
   const level = classify(value, thresholds, 'lowerIsBetter');
   const label = resolveLabel(options?.label, labelMttr, value, level);
