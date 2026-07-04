@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Baphomet.png/200px-Baphomet.png" alt="Baphomet — baphy mascot" width="130" />
+<img src="https://translate.google.com/website?sl=en&tl=es&hl=es&client=srp&u=https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Baphomet_by_%25C3%2589liphas_L%25C3%25A9vi.jpg/500px-Baphomet_by_%25C3%2589liphas_L%25C3%25A9vi.jpg" alt="Baphomet — baphy mascot" width="130" />
 
 # `@baphy/npm`
 
