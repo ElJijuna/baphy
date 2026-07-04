@@ -12,11 +12,13 @@ function makeTree(
   }
 
   const pkgCount = options.packages ?? 0;
+
   for (let i = 0; i < pkgCount; i++) {
     paths.push(`packages/pkg-${i}/package.json`);
   }
 
   const remaining = Math.max(0, size - paths.length);
+
   for (let i = 0; i < remaining; i++) {
     paths.push(`src/deeply/nested/file-${i}.ts`);
   }

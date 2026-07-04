@@ -29,13 +29,11 @@ const DEFINITIVE_INDICATORS = new Set([
   'rush.json',
   '.moon/workspace.yml',
 ]);
-
 /**
  * turbo.json is a soft signal: Turborepo can be used in single-package repos.
  * It is treated as definitive only when workspace packages are also found.
  */
 const SOFT_INDICATORS = new Set(['turbo.json']);
-
 /**
  * Directory names where workspace packages live exactly one level deep.
  * A package.json at depth 2 (e.g. "packages/foo/package.json") signals a package.
@@ -46,6 +44,7 @@ export function detectMonoRepo(paths: string[], truncated = false): MonoRepoResu
   let hasDefinitive = false;
   let hasSoft = false;
   let hasRootPackageJson = false;
+
   const workspacePackages: MonoRepoPackage[] = [];
 
   for (const path of paths) {
@@ -55,6 +54,7 @@ export function detectMonoRepo(paths: string[], truncated = false): MonoRepoResu
       hasSoft = true;
     } else if (path.endsWith('/package.json')) {
       const parts = path.split('/');
+
       // Depth-2 path: ["workspaceDir", "packageName", "package.json"] — exactly 3 parts
       if (parts.length === 3 && WORKSPACE_DIRS.has(parts[0])) {
         workspacePackages.push({

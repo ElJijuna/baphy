@@ -13,12 +13,14 @@ describe('definitive monorepo indicators', () => {
     '.moon/workspace.yml',
   ])('detects %s at root as monorepo', (indicator) => {
     const result = detectMonoRepo([indicator, 'package.json', 'src/index.ts']);
+
     expect(result.isMonoRepo).toBe(true);
     expect(result.truncated).toBe(false);
   });
 
   it('returns empty packages when indicator present but no workspace packages found', () => {
     const result = detectMonoRepo(['pnpm-workspace.yaml', 'package.json']);
+
     expect(result.isMonoRepo).toBe(true);
     expect(result.packages).toEqual([]);
   });
@@ -29,6 +31,7 @@ describe('definitive monorepo indicators', () => {
       'packages/a/package.json',
       'packages/b/package.json',
     ]);
+
     expect(result.isMonoRepo).toBe(true);
     expect(result.packages).toHaveLength(2);
     expect(result.packages[0]).toEqual({
@@ -43,6 +46,7 @@ describe('definitive monorepo indicators', () => {
 
   it('all definitive indicators simultaneously → monorepo', () => {
     const result = detectMonoRepo(['pnpm-workspace.yaml', 'lerna.json', 'nx.json', 'rush.json']);
+
     expect(result.isMonoRepo).toBe(true);
   });
 });
@@ -52,12 +56,14 @@ describe('definitive monorepo indicators', () => {
 describe('turbo.json soft indicator', () => {
   it('turbo.json alone → not a monorepo', () => {
     const result = detectMonoRepo(['turbo.json', 'package.json', 'src/index.ts']);
+
     expect(result.isMonoRepo).toBe(false);
     expect(result.packages).toEqual([{ path: '.', packageJsonPath: 'package.json' }]);
   });
 
   it('turbo.json + one workspace package → monorepo', () => {
     const result = detectMonoRepo(['turbo.json', 'packages/a/package.json']);
+
     expect(result.isMonoRepo).toBe(true);
     expect(result.packages).toHaveLength(1);
   });
@@ -68,6 +74,7 @@ describe('turbo.json soft indicator', () => {
       'packages/a/package.json',
       'packages/b/package.json',
     ]);
+
     expect(result.isMonoRepo).toBe(true);
     expect(result.packages).toHaveLength(2);
   });
@@ -78,6 +85,7 @@ describe('turbo.json soft indicator', () => {
       'apps/web/package.json',
       'packages/ui/package.json',
     ]);
+
     expect(result.isMonoRepo).toBe(true);
     expect(result.packages).toHaveLength(2);
   });
@@ -88,12 +96,14 @@ describe('turbo.json soft indicator', () => {
 describe('package discovery without indicator files', () => {
   it('zero workspace packages → not a monorepo', () => {
     const result = detectMonoRepo(['package.json', 'src/index.ts', 'README.md']);
+
     expect(result.isMonoRepo).toBe(false);
     expect(result.packages).toEqual([{ path: '.', packageJsonPath: 'package.json' }]);
   });
 
   it('exactly one workspace package → not a monorepo', () => {
     const result = detectMonoRepo(['packages/a/package.json', 'src/index.ts']);
+
     expect(result.isMonoRepo).toBe(false);
     expect(result.packages).toEqual([]);
   });
@@ -104,6 +114,7 @@ describe('package discovery without indicator files', () => {
       'packages/a/package.json',
       'packages/b/package.json',
     ]);
+
     expect(result.isMonoRepo).toBe(true);
     expect(result.packages).toHaveLength(2);
   });
@@ -117,6 +128,7 @@ describe('package discovery without indicator files', () => {
     'plugins',
   ])('detects packages in %s/ directory', (dir) => {
     const result = detectMonoRepo([`${dir}/a/package.json`, `${dir}/b/package.json`]);
+
     expect(result.isMonoRepo).toBe(true);
     expect(result.packages[0].path).toBe(`${dir}/a`);
     expect(result.packages[1].path).toBe(`${dir}/b`);
@@ -124,6 +136,7 @@ describe('package discovery without indicator files', () => {
 
   it('root package.json (depth 1) is returned for single-package repos', () => {
     const result = detectMonoRepo(['package.json']);
+
     expect(result.isMonoRepo).toBe(false);
     expect(result.packages).toEqual([{ path: '.', packageJsonPath: 'package.json' }]);
   });
@@ -133,11 +146,13 @@ describe('package discovery without indicator files', () => {
       'packages/scope/name/package.json',
       'packages/other/deep/package.json',
     ]);
+
     expect(result.isMonoRepo).toBe(false);
   });
 
   it('package.json in non-workspace dir at depth 2 is not counted', () => {
     const result = detectMonoRepo(['scripts/helper/package.json', 'examples/demo/package.json']);
+
     expect(result.isMonoRepo).toBe(false);
   });
 
@@ -148,6 +163,7 @@ describe('package discovery without indicator files', () => {
       'packages/c/src/package.json', // depth 3 — ignored
       'package.json', // root — ignored
     ]);
+
     // Only 1 valid package, not enough to infer monorepo
     expect(result.isMonoRepo).toBe(false);
     expect(result.packages).toEqual([{ path: '.', packageJsonPath: 'package.json' }]);
@@ -168,6 +184,7 @@ describe('baphy repo fixture', () => {
       'packages/npm/tsconfig.json',
       '.changeset/config.json',
     ]);
+
     // turbo.json + 1 workspace package → soft indicator confirmed = monorepo
     expect(result.isMonoRepo).toBe(true);
     expect(result.packages).toHaveLength(1);
@@ -184,6 +201,7 @@ describe('baphy repo fixture', () => {
       'packages/npm/package.json',
       'packages/git/package.json',
     ]);
+
     expect(result.isMonoRepo).toBe(true);
     expect(result.packages).toHaveLength(2);
   });
@@ -194,6 +212,7 @@ describe('baphy repo fixture', () => {
 describe('edge cases', () => {
   it('empty paths → not a monorepo', () => {
     const result = detectMonoRepo([]);
+
     expect(result.isMonoRepo).toBe(false);
     expect(result.packages).toEqual([]);
     expect(result.truncated).toBe(false);
@@ -201,17 +220,20 @@ describe('edge cases', () => {
 
   it('truncated: true is surfaced in result', () => {
     const result = detectMonoRepo([], true);
+
     expect(result.truncated).toBe(true);
   });
 
   it('truncated tree with definitive indicator → isMonoRepo: true, truncated: true', () => {
     const result = detectMonoRepo(['pnpm-workspace.yaml'], true);
+
     expect(result.isMonoRepo).toBe(true);
     expect(result.truncated).toBe(true);
   });
 
   it('truncated tree with no indicators → isMonoRepo: false, truncated: true', () => {
     const result = detectMonoRepo(['src/index.ts', 'README.md'], true);
+
     expect(result.isMonoRepo).toBe(false);
     expect(result.truncated).toBe(true);
   });
@@ -224,12 +246,14 @@ describe('edge cases', () => {
       'packages/b',
       'packages/b/package.json',
     ]);
+
     expect(result.isMonoRepo).toBe(true);
     expect(result.packages).toHaveLength(2);
   });
 
   it('no second argument defaults truncated to false', () => {
     const result = detectMonoRepo([]);
+
     expect(result.truncated).toBe(false);
   });
 });
@@ -247,6 +271,7 @@ describe('non-monorepo repositories', () => {
       '.gitignore',
       'tsconfig.json',
     ]);
+
     expect(result.isMonoRepo).toBe(false);
     expect(result.packages).toEqual([{ path: '.', packageJsonPath: 'package.json' }]);
   });
@@ -260,6 +285,7 @@ describe('non-monorepo repositories', () => {
       'tests/test_main.py',
       'README.md',
     ]);
+
     expect(result.isMonoRepo).toBe(false);
     expect(result.packages).toEqual([]);
   });
@@ -271,6 +297,7 @@ describe('non-monorepo repositories', () => {
       'test/fixtures/package.json',
       'examples/demo/package.json',
     ]);
+
     expect(result.isMonoRepo).toBe(false);
     expect(result.packages).toEqual([{ path: '.', packageJsonPath: 'package.json' }]);
   });
