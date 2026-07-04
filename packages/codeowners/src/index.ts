@@ -25,16 +25,19 @@ const SECTION_PATTERN = /^\^?\[([^\]]+)\](?:\[\d+\])?/;
 export function parseCodeowners(content: string): CodeownersRule[] {
   const rules: CodeownersRule[] = [];
   const lines = content.split(/\r?\n/);
+
   let section: string | null = null;
   let sectionOwners: string[] = [];
 
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index].trim();
+
     if (!line || line.startsWith('#')) {
       continue;
     }
 
     const sectionMatch = line.match(SECTION_PATTERN);
+
     if (sectionMatch) {
       section = sectionMatch[1].trim();
       sectionOwners = tokenize(line.slice(sectionMatch[0].length));
@@ -42,6 +45,7 @@ export function parseCodeowners(content: string): CodeownersRule[] {
     }
 
     const [pattern, ...owners] = tokenize(line);
+
     if (!pattern) {
       continue;
     }
@@ -81,12 +85,15 @@ const patternCache = new Map<string, RegExp>();
 
 function compilePattern(pattern: string): RegExp {
   const cached = patternCache.get(pattern);
+
   if (cached) {
     return cached;
   }
 
   const compiled = patternToRegExp(pattern);
+
   patternCache.set(pattern, compiled);
+
   return compiled;
 }
 
@@ -100,25 +107,33 @@ function compilePattern(pattern: string): RegExp {
  */
 function patternToRegExp(pattern: string): RegExp {
   let rest = pattern;
+
   const dirOnly = rest.endsWith('/');
+
   if (dirOnly) {
     rest = rest.slice(0, -1);
   }
 
   const anchored = rest.includes('/');
+
   if (rest.startsWith('/')) {
     rest = rest.slice(1);
   }
 
   const segments = rest.split('/');
+
   let source = '';
+
   for (let index = 0; index < segments.length; index += 1) {
     const segment = segments[index];
+
     if (segment === '**') {
       source += index === segments.length - 1 ? '.*' : '(?:[^/]+/)*';
       continue;
     }
+
     source += translateSegment(segment);
+
     if (index < segments.length - 1) {
       source += '/';
     }
@@ -133,6 +148,7 @@ function patternToRegExp(pattern: string): RegExp {
 
 function translateSegment(segment: string): string {
   let source = '';
+
   for (const char of segment) {
     if (char === '*') {
       source += '[^/]*';
@@ -142,15 +158,18 @@ function translateSegment(segment: string): string {
       source += char.replace(/[.+^${}()|[\]\\]/, '\\$&');
     }
   }
+
   return source;
 }
 
 function tokenize(line: string): string[] {
   const tokens: string[] = [];
+
   let current = '';
 
   for (let index = 0; index < line.length; index += 1) {
     const char = line[index];
+
     if (char === '\\' && line[index + 1] === ' ') {
       current += ' ';
       index += 1;
@@ -170,5 +189,6 @@ function tokenize(line: string): string[] {
   if (current) {
     tokens.push(current);
   }
+
   return tokens;
 }

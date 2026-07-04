@@ -94,10 +94,12 @@ describe('matchCodeowners', () => {
   it('a trailing wildcard segment matches direct children only', () => {
     expect(matchCodeowners(rules, 'docs/getting-started.md')?.pattern).toBe('/docs/');
     const nested = matchCodeowners(rules, 'docs/build-app/troubleshooting.md');
+
     // docs/* must not match the nested file; /docs/ does.
     expect(nested?.pattern).toBe('/docs/');
 
     const smaller = parseCodeowners('docs/* @octocat');
+
     expect(matchCodeowners(smaller, 'docs/getting-started.md')?.owners).toEqual(['@octocat']);
     expect(matchCodeowners(smaller, 'docs/build-app/troubleshooting.md')).toBeNull();
   });
@@ -108,10 +110,12 @@ describe('matchCodeowners', () => {
 
   it('** crosses directories', () => {
     const logsRules = parseCodeowners('**/logs @octocat');
+
     expect(matchCodeowners(logsRules, 'build/logs/output.txt')?.owners).toEqual(['@octocat']);
     expect(matchCodeowners(logsRules, 'logs/output.txt')?.owners).toEqual(['@octocat']);
 
     const innerRules = parseCodeowners('apps/**/config.yml @octocat');
+
     expect(matchCodeowners(innerRules, 'apps/web/deep/config.yml')?.owners).toEqual(['@octocat']);
     expect(matchCodeowners(innerRules, 'apps/config.yml')?.owners).toEqual(['@octocat']);
   });
@@ -122,6 +126,7 @@ describe('matchCodeowners', () => {
 
   it('returns null when nothing matches', () => {
     const smaller = parseCodeowners('*.js @js-owner');
+
     expect(matchCodeowners(smaller, 'README.md')).toBeNull();
   });
 
@@ -131,6 +136,7 @@ describe('matchCodeowners', () => {
 
   it('? matches a single non-slash character', () => {
     const qRules = parseCodeowners('file-?.txt @octocat');
+
     expect(matchCodeowners(qRules, 'file-a.txt')?.owners).toEqual(['@octocat']);
     expect(matchCodeowners(qRules, 'file-ab.txt')).toBeNull();
   });
